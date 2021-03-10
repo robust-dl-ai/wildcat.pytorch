@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import torch.utils.data as data
 from PIL import Image
 
-from wildcat import util
+from wildcat.wildcat import util
 
 urls = {
     'images': 'http://groups.csail.mit.edu/vision/LabelMe/NewImages/indoorCVPR_09.tar',

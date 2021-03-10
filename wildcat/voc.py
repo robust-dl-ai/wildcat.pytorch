@@ -9,7 +9,7 @@ import torch
 import torch.utils.data as data
 from PIL import Image
 
-from wildcat import util
+from wildcat.wildcat import util
 
 object_categories = ['aeroplane', 'bicycle', 'bird', 'boat',
                      'bottle', 'bus', 'car', 'cat', 'chair',

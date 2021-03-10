@@ -3,9 +3,9 @@ import argparse
 import torch
 import torch.nn as nn
 
-from wildcat.engine import MulticlassEngine
-from wildcat.mit67 import Mit67
-from wildcat.models import resnet101_wildcat
+from wildcat.wildcat.engine import MultiLabelMAPEngine
+from wildcat.wildcat.mit67 import Mit67
+from wildcat.wildcat.models import resnet101_wildcat
 
 parser = argparse.ArgumentParser(description='WILDCAT Training')
 parser.add_argument('data', metavar='DIR',
@@ -72,7 +72,7 @@ def main_voc2007():
     state['difficult_examples'] = True
     state['save_model_path'] = '../expes/models/mit67/'
 
-    engine = MulticlassEngine(state)
+    engine = MultiLabelMAPEngine(state)
     engine.learning(model, criterion, train_dataset, val_dataset, optimizer)
 
 

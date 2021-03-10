@@ -3,9 +3,9 @@ import argparse
 import torch
 import torch.nn as nn
 
-from wildcat.engine import MultiLabelMAPEngine
-from wildcat.models import resnet101_wildcat
-from wildcat.voc import Voc2007Classification
+from wildcat.wildcat.engine import MultiLabelMAPEngine
+from wildcat.wildcat.models import resnet101_wildcat
+from wildcat.wildcat.voc import Voc2007Classification
 
 parser = argparse.ArgumentParser(description='WILDCAT Training')
 parser.add_argument('data', metavar='DIR',

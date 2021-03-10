@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torchvision.models as models
 
-from wildcat.pooling import WildcatPool2d, ClassWisePool
+from wildcat.wildcat.pooling import WildcatPool2d, ClassWisePool
 
 
 class ResNetWSL(nn.Module):
@@ -59,3 +59,17 @@ def resnet101_wildcat(num_classes, pretrained=True, kmax=1, kmin=None, alpha=1, 
     pooling.add_module('class_wise', ClassWisePool(num_maps))
     pooling.add_module('spatial', WildcatPool2d(kmax, kmin, alpha))
     return ResNetWSL(model, num_classes * num_maps, pooling=pooling)
+
+
+if __name__ == '__main__':
+    from torchsummary import summary
+    import torch
+
+    summary(resnet101_wildcat(20), input_size=(3, 448, 448))
+
+    model = resnet101_wildcat(20)
+    x = torch.rand([2, 3, 448, 448])
+    y = model.forward(x)
+    print(y.shape)
+    model.eval()
+    assert y.shape == (2, 20)

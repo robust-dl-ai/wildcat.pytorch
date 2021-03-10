@@ -11,7 +11,7 @@ import torchnet as tnt
 import torchvision.transforms as transforms
 from tqdm import tqdm
 
-from wildcat.util import AveragePrecisionMeter, Warp
+from wildcat.wildcat.util import AveragePrecisionMeter, Warp
 
 
 class Engine(object):
@@ -181,7 +181,6 @@ class Engine(object):
             else:
                 print("=> no checkpoint found at '{}'".format(self.state['resume']))
 
-
         if self.state['use_gpu']:
             train_loader.pin_memory = True
             val_loader.pin_memory = True
@@ -245,18 +244,18 @@ class Engine(object):
             self.on_start_batch(True, model, criterion, data_loader, optimizer)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda(async=True)
+                self.state['target'] = self.state['target']
 
-            self.on_forward(True, model, criterion, data_loader, optimizer)
+                self.on_forward(True, model, criterion, data_loader, optimizer)
 
-            # measure elapsed time
-            self.state['batch_time_current'] = time.time() - end
-            self.state['batch_time'].add(self.state['batch_time_current'])
-            end = time.time()
-            # measure accuracy
-            self.on_end_batch(True, model, criterion, data_loader, optimizer)
+                # measure elapsed time
+                self.state['batch_time_current'] = time.time() - end
+                self.state['batch_time'].add(self.state['batch_time_current'])
+                end = time.time()
+                # measure accuracy
+                self.on_end_batch(True, model, criterion, data_loader, optimizer)
 
-        self.on_end_epoch(True, model, criterion, data_loader, optimizer)
+            self.on_end_epoch(True, model, criterion, data_loader, optimizer)
 
     def validate(self, data_loader, model, criterion):
 
@@ -281,20 +280,20 @@ class Engine(object):
             self.on_start_batch(False, model, criterion, data_loader)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda(async=True)
+                self.state['target'] = self.state['target']
 
-            self.on_forward(False, model, criterion, data_loader)
+                self.on_forward(False, model, criterion, data_loader)
 
-            # measure elapsed time
-            self.state['batch_time_current'] = time.time() - end
-            self.state['batch_time'].add(self.state['batch_time_current'])
-            end = time.time()
-            # measure accuracy
-            self.on_end_batch(False, model, criterion, data_loader)
+                # measure elapsed time
+                self.state['batch_time_current'] = time.time() - end
+                self.state['batch_time'].add(self.state['batch_time_current'])
+                end = time.time()
+                # measure accuracy
+                self.on_end_batch(False, model, criterion, data_loader)
 
-        score = self.on_end_epoch(False, model, criterion, data_loader)
+            score = self.on_end_epoch(False, model, criterion, data_loader)
 
-        return score
+            return score
 
     def save_checkpoint(self, state, is_best, filename='checkpoint.pth.tar'):
         if self._state('save_model_path') is not None:
@@ -312,7 +311,8 @@ class Engine(object):
             if self._state('save_model_path') is not None:
                 if self._state('filename_previous_best') is not None:
                     os.remove(self._state('filename_previous_best'))
-                filename_best = os.path.join(self.state['save_model_path'], 'model_best_{score:.4f}.pth.tar'.format(score=state['best_score']))
+                filename_best = os.path.join(self.state['save_model_path'],
+                                             'model_best_{score:.4f}.pth.tar'.format(score=state['best_score']))
                 shutil.copyfile(filename, filename_best)
                 self.state['filename_previous_best'] = filename_best
 
@@ -356,7 +356,8 @@ class MulticlassEngine(Engine):
         # measure accuracy
         self.state['classacc'].add(self.state['output'].data, self.state['target'])
 
-        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
+        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state[
+            'print_freq'] == 0:
             top1 = self.state['classacc'].value()[0]
             loss = self.state['meter_loss'].value()[0]
             batch_time = self.state['batch_time'].value()[0]
@@ -377,7 +378,8 @@ class MulticlassEngine(Engine):
                       'Data {data_time_current:.3f} ({data_time:.3f})\t'
                       'Loss {loss_current:.4f} ({loss:.4f})\t'
                       'Prec@1 {top1:.3f}'.format(
-                    self.state['iteration'], len(data_loader), batch_time_current=self.state['batch_time_current'],
+                    self.state['iteration'], len(data_loader),
+                    batch_time_current=self.state['batch_time_current'],
                     batch_time=batch_time, data_time_current=self.state['data_time_batch'],
                     data_time=data_time, loss_current=self.state['loss_batch'], loss=loss, top1=top1))
 
@@ -416,7 +418,8 @@ class MulticlassTop5Engine(Engine):
         # measure accuracy
         self.state['classacc'].add(self.state['output'].data, self.state['target'])
 
-        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
+        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state[
+            'print_freq'] == 0:
             top1 = self.state['classacc'].value()[0]
             top5 = self.state['classacc'].value()[1]
             loss = self.state['meter_loss'].value()[0]
@@ -440,9 +443,11 @@ class MulticlassTop5Engine(Engine):
                       'Loss {loss_current:.4f} ({loss:.4f})\t'
                       'Prec@1 {top1:.3f}\t'
                       'Prec@5 {top5:.3f}'.format(
-                    self.state['iteration'], len(data_loader), batch_time_current=self.state['batch_time_current'],
+                    self.state['iteration'], len(data_loader),
+                    batch_time_current=self.state['batch_time_current'],
                     batch_time=batch_time, data_time_current=self.state['data_time_batch'],
-                    data_time=data_time, loss_current=self.state['loss_batch'], loss=loss, top1=top1, top5=top5))
+                    data_time=data_time, loss_current=self.state['loss_batch'], loss=loss, top1=top1,
+                    top5=top5))
 
 
 class MultiLabelMAPEngine(Engine):
@@ -487,7 +492,8 @@ class MultiLabelMAPEngine(Engine):
         # measure mAP
         self.state['ap_meter'].add(self.state['output'].data, self.state['target_gt'])
 
-        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
+        if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state[
+            'print_freq'] == 0:
             loss = self.state['meter_loss'].value()[0]
             batch_time = self.state['batch_time'].value()[0]
             data_time = self.state['data_time'].value()[0]
@@ -505,6 +511,7 @@ class MultiLabelMAPEngine(Engine):
                       'Time {batch_time_current:.3f} ({batch_time:.3f})\t'
                       'Data {data_time_current:.3f} ({data_time:.3f})\t'
                       'Loss {loss_current:.4f} ({loss:.4f})'.format(
-                    self.state['iteration'], len(data_loader), batch_time_current=self.state['batch_time_current'],
+                    self.state['iteration'], len(data_loader),
+                    batch_time_current=self.state['batch_time_current'],
                     batch_time=batch_time, data_time_current=self.state['data_time_batch'],
                     data_time=data_time, loss_current=self.state['loss_batch'], loss=loss))
